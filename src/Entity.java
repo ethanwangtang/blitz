@@ -23,15 +23,21 @@ public class Entity extends Object
     protected boolean onGround;
     protected int velX, velY;
     protected Map mapRef;
-    
+
+    private ArrayList<Object> allTerrain;
+    private ArrayList<Arrow> allArrows;
+
     //no ghost entities allowed!
     public Entity(String imgName, Map mapImp, int x, int y, int w, int h)
     {
         super(imgName, x, y, w, h);
         id = "";
+        onGround = false;
         mapRef = mapImp;
         mapRef.addEntity(this);
         allTerrain = mapRef.getTerrain();
+        allArrows = mapRef.getArrows();
+        //allArrows = new ArrayList<>();
         generateScaledImage();
     }
     //return value methods here:
@@ -78,63 +84,47 @@ public class Entity extends Object
         posX += x;
         posY += y;
     }
-    private ArrayList<Object> allTerrain;
+
     public void control(int x, int y)
     {
         if (x > 0)
         {
             for (int i = 0; i < x; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posX++;
                 }
-                posX++;
             }
         }
         else if (x < 0)
         {
             for (int i = 0; i < -x; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posX--;
                 }
-                posX--;
             }
         }
         if (y > 0)
         {
             for(int i = 0; i < y; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posY++;
                 }
-                posY++;
             }  
         }
         else if (y < 0)
         {
             for(int i = 0; i < -y; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posY--;
                 }
-                posY--;
             }  
         }
     }
@@ -151,63 +141,49 @@ public class Entity extends Object
         velY += y;
     }
     //Interactions
-    public void applyPhysics(ArrayList<Object> allTerrain)
+    public void applyPhysics()
     {
-        onGround = false;
+        push(0, 2); //apply gravity
+        //onGround = false;
         if (velX > 0)
         {
             for (int i = 0; i < velX; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posX++;
                 }
-                posX++;
+
             }
         }
         else if (velX < 0)
         {
             for (int i = 0; i < -velX; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posX--;
                 }
-                posX--;
             }
         }
         if (velY > 0)
         {
             for(int i = 0; i < velY; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                checkAllArrows();
+                if(!checkAllTerrain()){
+                    posY++;
                 }
-                posY++;
             }  
         }
         else if (velY < 0)
         {
+            checkAllArrows();
             for(int i = 0; i < -velY; i++)
             {
-                for (Object b : allTerrain)
-                {
-                    if (collidesWith(b))
-                    {
-                        terrainInteraction(b);
-                    }
+                if(!checkAllTerrain()){
+                    posY--;
                 }
-                posY--;
             }  
         }
     }
@@ -224,12 +200,38 @@ public class Entity extends Object
         return false;
     }
 
+    private boolean checkAllTerrain()
+    {
+        for (Object b : allTerrain)
+        {
+            if (collidesWith(b))
+            {
+                terrainInteraction(b);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkAllArrows()
+    {
+        for (Arrow b : allArrows)
+        {
+            if (collidesWith(b))
+            {
+                arrowInteraction(b);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void terrainInteraction(Object a)
     {
         //How deep the entity can go into the terrain and still be repelled out of it
         int buffer;
         //buffer set here
-        buffer = 2;
+        buffer = 5;
         //set variables for higher clarity
         int terrainTopSide, terrainBotSide, terrainLeftSide, terrainRightSide;
         int entityTopSide, entityBotSide, entityLeftSide, entityRightSide;
@@ -246,21 +248,38 @@ public class Entity extends Object
         if (entityBotSide >= terrainTopSide && entityBotSide <= terrainTopSide + buffer)
         {
             onGround = true;
+            //rejection from ground.
             move(0, -1);
-            force(0, 0);
+            force(velX, 0); //counteract gravity (e.g. normal force).
+            //friction
+            if (velX > 0)
+            {
+                push(-1, 0);
+            }
+            else if (velX < 0)
+            {
+                push(1, 0);
+            }
         }
         if (entityTopSide <= terrainBotSide && entityTopSide >= terrainBotSide - buffer)
         {
             move(0, 1);
-            force(0, 0);
+            force(velX, 0);
         }
         if (entityRightSide >= terrainLeftSide && entityRightSide <= terrainLeftSide + buffer)
         {
             move(-1, 0);
+            force(0,velY);
         }
         if (entityLeftSide <= terrainRightSide && entityLeftSide >= terrainRightSide - buffer)
         {
             move(1, 0);
+            force(0,velY);
         }
+    }
+
+    public void arrowInteraction(Arrow a)
+    {
+        terrainInteraction(a);
     }
 }

@@ -34,7 +34,7 @@ public abstract class Object
         }
         catch (IOException missingResource)
         {
-            System.out.print("missing resource error");
+            missingResource.printStackTrace();
         }
         posX = x;
         posY = y;

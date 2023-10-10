@@ -1,3 +1,5 @@
+import javafx.util.Pair;
+
 import java.awt.*;          // access to Container
 import java.awt.event.*;    // access to WindowAdapter, WindowEvent
 import javax.swing.*;       // access to JFrame and Jcomponents
@@ -20,11 +22,12 @@ import java.net.URL;
  */
 public class Map implements ActionListener
 {
+    private ArrayList<Pair<Entity, Integer>> forceQueue;
     private int[] terrainGen;
     private ArrayList<Entity> allEntities;
     private ArrayList<Object> allTerrain;
 
-    private ArrayList<Object> allArrows;
+    private ArrayList<Arrow> allArrows;
     private ArrayList<StasisField> allFields;
     //gameClock has to be less than the fps god damnit
     private Timer gameClock;
@@ -36,8 +39,9 @@ public class Map implements ActionListener
         gameClock.start();
         allEntities = new ArrayList<Entity>();
         allTerrain = new ArrayList<Object>();
-        allArrows = new ArrayList<Object>();
+        allArrows = new ArrayList<Arrow>();
         allFields = new ArrayList<StasisField>();
+        forceQueue = new ArrayList<Pair<Entity, Integer>>();
     }
     //Plugging in entities and players and stuff
     
@@ -81,6 +85,7 @@ public class Map implements ActionListener
     {
         return allTerrain;
     }
+    public ArrayList<Arrow> getArrows() { return allArrows; }
     //Clock cycle stuff
     public void actionPerformed(ActionEvent evt)
     {
@@ -90,20 +95,7 @@ public class Map implements ActionListener
     {
         for (Entity a : allEntities)
         {
-            //gravity sim
-            if (a.getGroundState() == false)
-            {
-                if (a.getVelY() < 50)
-                {
-                    a.push(0, 2);
-                }
-            }
-            else
-            {
-                a.force(0, 1);
-            }
-            a.applyPhysics(allTerrain);
-            a.applyPhysics(allArrows);
+            a.applyPhysics();
         }
     }
 }

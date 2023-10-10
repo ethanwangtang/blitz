@@ -37,7 +37,7 @@ public class Controller implements ActionListener, MouseListener
     private Map mapRef;
     private Camera viewer;
     //boolean references to keys (if they are pressed);
-    private boolean w, a, s, d, up, down, left, right;
+    private boolean w, a, s, d, up, down, left, right, t, y;
     public Controller(Swordsman player1, Archer player2, Map mapInp, Camera viewer)
     {
         mapRef = mapInp;
@@ -66,6 +66,15 @@ public class Controller implements ActionListener, MouseListener
                 {
                     s = true;
                 }
+                if (e.getKeyCode() == KeyEvent.VK_T)
+                {
+                    t = true;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_Y)
+                {
+                    y = true;
+                }
+
                 
                 if (e.getKeyCode() == KeyEvent.VK_UP)
                 {
@@ -101,6 +110,14 @@ public class Controller implements ActionListener, MouseListener
                 if (e.getKeyCode() == KeyEvent.VK_S)
                 {
                     s = false;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_S)
+                {
+                    t = false;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_Y)
+                {
+                    y = false;
                 }
                 
                 if (e.getKeyCode() == KeyEvent.VK_UP)
@@ -180,19 +197,26 @@ public class Controller implements ActionListener, MouseListener
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        //true x and y location calculated in relation to the camera and such.
-        int x = (int)((e.getX() - viewer.centerX)*Object.SCALE);
-        int y = (int)((e.getY() - viewer.centerY)*Object.SCALE);
+        if(archerRef.onCooldown())
+        {
+            //do nothing
+        }
+        else
+        {
+            //true x and y location calculated in relation to the camera and such.
+            int x = (int)((e.getX() - viewer.centerX)*Object.SCALE);
+            int y = (int)((e.getY() - viewer.centerY)*Object.SCALE);
 
-        Arrow arrow = new Arrow(mapRef, archerRef.posX,archerRef.posY-100);
-        //calculate trajectory
-        double x_relative = x - archerRef.posX;
-        double y_relative = y - archerRef.posY;
+            Arrow arrow = new Arrow(mapRef, archerRef.posX,archerRef.posY-100);
+            //calculate trajectory
+            double x_relative = x - archerRef.posX;
+            double y_relative = y - archerRef.posY;
 
-        double angle = Math.atan2(y_relative, x_relative);
-        double force = 100;
-        arrow.force((int)(force * Math.cos(angle)), (int)(force * Math.sin(angle)));
-
+            double angle = Math.atan2(y_relative, x_relative);
+            double force = 100;
+            arrow.force((int)(force * Math.cos(angle)), (int)(force * Math.sin(angle)));
+            archerRef.applyCooldown();
+        }
     }
 
     @Override
