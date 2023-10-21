@@ -1,19 +1,9 @@
 import javafx.util.Pair;
 
-import java.awt.*;          // access to Container
 import java.awt.event.*;    // access to WindowAdapter, WindowEvent
 import javax.swing.*;       // access to JFrame and Jcomponents
-import javax.swing.event.*;     // access to JSlider events
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 import java.util.ArrayList;
-import java.net.URL;
+
 /**
  * Write a description of class Map here.
  *
@@ -22,13 +12,14 @@ import java.net.URL;
  */
 public class Map implements ActionListener
 {
-    private ArrayList<Pair<Entity, Integer>> forceQueue;
     private int[] terrainGen;
     private ArrayList<Entity> allEntities;
     private ArrayList<Object> allTerrain;
+    private ArrayList<Block> allBlocks;
 
     private ArrayList<Arrow> allArrows;
-    private ArrayList<StasisField> allFields;
+
+    private ArrayList<Object> removalQueue;
     //gameClock has to be less than the fps god damnit
     private Timer gameClock;
     private Swordsman swordsmanRef;
@@ -40,10 +31,14 @@ public class Map implements ActionListener
         allEntities = new ArrayList<Entity>();
         allTerrain = new ArrayList<Object>();
         allArrows = new ArrayList<Arrow>();
-        allFields = new ArrayList<StasisField>();
-        forceQueue = new ArrayList<Pair<Entity, Integer>>();
+        allBlocks = new ArrayList<Block>();
+        removalQueue = new ArrayList<Object>();
     }
     //Plugging in entities and players and stuff
+
+    public void addBlock(Block toAdd) {allBlocks.add(toAdd);}
+
+    public void addToRemovalQueue(Object toAdd) {removalQueue.add(toAdd);}
     
     public void addEntity(Entity toAdd)
     {
@@ -86,6 +81,8 @@ public class Map implements ActionListener
         return allTerrain;
     }
     public ArrayList<Arrow> getArrows() { return allArrows; }
+
+    public ArrayList<Block> getBlocks() { return allBlocks; }
     //Clock cycle stuff
     public void actionPerformed(ActionEvent evt)
     {
@@ -97,5 +94,10 @@ public class Map implements ActionListener
         {
             a.applyPhysics();
         }
+        for(Object a : removalQueue)
+        {
+            allEntities.remove(a);
+        }
+        removalQueue.clear();
     }
 }

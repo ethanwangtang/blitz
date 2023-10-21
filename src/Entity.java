@@ -144,7 +144,7 @@ public class Entity extends Object
     public void applyPhysics()
     {
         push(0, 2); //apply gravity
-        //onGround = false;
+        onGround = false;
         if (velX > 0)
         {
             for (int i = 0; i < velX; i++)
@@ -231,7 +231,7 @@ public class Entity extends Object
         //How deep the entity can go into the terrain and still be repelled out of it
         int buffer;
         //buffer set here
-        buffer = 5;
+        buffer = 10;
         //set variables for higher clarity
         int terrainTopSide, terrainBotSide, terrainLeftSide, terrainRightSide;
         int entityTopSide, entityBotSide, entityLeftSide, entityRightSide;

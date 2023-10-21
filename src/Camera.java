@@ -87,11 +87,12 @@ public class Camera extends JPanel implements ActionListener
         
         
         centerX = -(OFFSET + sX - ((sX - aX)/2));
-        
-        if (centerX + swordsmanRef.getScaledXPos() < 100)
+
+        //ok so this just sends the swordsman into the shadowrealm???
+        /*if (centerX + swordsmanRef.getScaledXPos() < 100)
         {
             swordsmanRef.setX(archerRef.getXPos() - 5000);
-        }
+        }*/
         //g.drawImage(swordsmanRef.getScaledImage(), centerX + sX, centerY + sX, this);
 
         for (Entity a : mapRef.getEntities())

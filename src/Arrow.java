@@ -9,7 +9,7 @@ public class Arrow extends Entity{
 
     public Arrow(Map mapImp, int x, int y)
     {
-        super("terrain.png", mapImp, x, y, 100, 100);
+        super("terrain.png", mapImp, x, y, 200, 200);
         id = "arrow";
 
         mapImp.addArrow(this);
@@ -17,10 +17,16 @@ public class Arrow extends Entity{
 
     @Override public void arrowInteraction(Arrow a)
     {
+        if(true)
+        {
+            return; //we are just gonna skip arrow to arrow interactions for now.
+        }
         if(a == this)
         {
-            return;
+            return; //avoid self interactions.
         }
+        //I think the best approach for this is to have arrows interact on other arrows than vice versa,
+        //where they just receive interactions from other arrows,
         //How deep the entity can go into the terrain and still be repelled out of it
         int buffer;
         //buffer set here
@@ -38,27 +44,43 @@ public class Arrow extends Entity{
         terrainBotSide = a.getYPos() + a.getHeight();
         terrainLeftSide = a.getXPos();
         terrainRightSide = a.getXPos() + a.getWidth();
+        //something about collisions causes massive lag, i assume it's due to both
+        //of them trying to interact with each other at the same time.
+
+        //perhaps an "active" mode would fix that, but for now im gonna skip that.
+        //at best I will implement stacking them on top of each other.
         if (entityBotSide >= terrainTopSide && entityBotSide <= terrainTopSide + buffer)
         {
             onGround = true;
             move(0, -1);
-            //absorb velocity on object below
-            force(a.velX, velY);
         }
         if (entityTopSide <= terrainBotSide && entityTopSide >= terrainBotSide - buffer)
         {
-            //a.force(velX, velY);//top one takes velocity
+            move(0, 1);
+            force(velX, 0);
         }
-        //something below about these types of collision causes massive lag.
         if (entityRightSide >= terrainLeftSide && entityRightSide <= terrainLeftSide + buffer)
         {
-            //force(velX/2, velY);
-            //a.push(velX/2, a.getVelY());
+            move(-1, 0);
+            a.push(velX, velY);
         }
         if (entityLeftSide <= terrainRightSide && entityLeftSide >= terrainRightSide - buffer)
         {
-            //force(velX/2, velY);
-            //a.push(velX/2, 0);
+            move(1,0);
+            a.push(velX, velY);
+        }
+    }
+
+    @Override
+    public void applyPhysics()
+    {
+        super.applyPhysics();
+        Swordsman sm = mapRef.getSwordsman();
+        if (collidesWith(sm))
+        {
+            sm.force(velX, velY);
+            sm.setY(posY-sm.height);
+            sm.onGround = true;
         }
     }
 }

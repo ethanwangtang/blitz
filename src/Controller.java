@@ -37,7 +37,7 @@ public class Controller implements ActionListener, MouseListener
     private Map mapRef;
     private Camera viewer;
     //boolean references to keys (if they are pressed);
-    private boolean w, a, s, d, up, down, left, right, t, y;
+    private boolean w, a, s, d, up, down, left, right, t, y, space;
     public Controller(Swordsman player1, Archer player2, Map mapInp, Camera viewer)
     {
         mapRef = mapInp;
@@ -73,6 +73,10 @@ public class Controller implements ActionListener, MouseListener
                 if (e.getKeyCode() == KeyEvent.VK_Y)
                 {
                     y = true;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_SPACE)
+                {
+                    space = true;
                 }
 
                 
@@ -111,13 +115,17 @@ public class Controller implements ActionListener, MouseListener
                 {
                     s = false;
                 }
-                if (e.getKeyCode() == KeyEvent.VK_S)
+                if (e.getKeyCode() == KeyEvent.VK_T)
                 {
                     t = false;
                 }
                 if (e.getKeyCode() == KeyEvent.VK_Y)
                 {
                     y = false;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_SPACE)
+                {
+                    space = false;
                 }
                 
                 if (e.getKeyCode() == KeyEvent.VK_UP)
@@ -155,19 +163,55 @@ public class Controller implements ActionListener, MouseListener
         if (a == true)
         {
             swordsmanRef.control(-25, 0);
+            swordsmanRef.movementDir = 2;
         }
         if (d == true)
         {
             swordsmanRef.control(25, 0);
+            swordsmanRef.movementDir = 3;
         }
-        if (w == true && swordsmanRef.getGroundState() == true)
+        if (w == true)
         {
-            swordsmanRef.force(0, -75);
-            swordsmanRef.setGroundState(false);
+            swordsmanRef.movementDir = 0;
         }
         if (s == true)
         {
-            swordsmanRef.force(0, 100);
+            swordsmanRef.force(0, 50);
+            swordsmanRef.movementDir = 1;
+        }
+        if (t == true)
+        {
+            if (!swordsmanRef.getAttackCooldown())
+            {
+                switch(mapRef.getSwordsman().movementDir){
+                    case 0: new Attack(mapRef, swordsmanRef.getXPos()-25, swordsmanRef.getYPos()-25, 100, 50, 5, 0);
+                            break;
+                    case 1: new Attack(mapRef, swordsmanRef.getXPos()-25, swordsmanRef.getYPos(), 100, 125, 5, 1);
+                        break;
+                    case 2: new Attack(mapRef, swordsmanRef.getXPos()-50, swordsmanRef.getYPos()+5, 50, 100, 5, 2);
+                        break;
+                    case 3: new Attack(mapRef, swordsmanRef.getXPos()+50, swordsmanRef.getYPos()+5, 50, 100, 5, 3);
+                        break;
+                    default: System.out.println("Error: No direction");
+                }
+                swordsmanRef.applyAttackCooldown(25);
+            }
+        }
+        if (y == true)
+        {
+            if (swordsmanRef.getBlockCooldown())
+            {
+
+            }
+            else {
+                new Block(mapRef, swordsmanRef.getXPos() - 25, swordsmanRef.getYPos() - 25, 100, 150, 10);
+                swordsmanRef.applyBlockCooldown(50);
+            }
+        }
+        if (space && swordsmanRef.getGroundState() == true)
+        {
+            swordsmanRef.force(0, -50);
+            swordsmanRef.setGroundState(false);
         }
         
         if (left == true)
