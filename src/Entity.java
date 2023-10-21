@@ -24,8 +24,8 @@ public class Entity extends Object
     protected int velX, velY;
     protected Map mapRef;
 
-    private ArrayList<Object> allTerrain;
-    private ArrayList<Arrow> allArrows;
+    protected ArrayList<Object> allTerrain;
+    protected ArrayList<Arrow> allArrows;
 
     //no ghost entities allowed!
     public Entity(String imgName, Map mapImp, int x, int y, int w, int h)

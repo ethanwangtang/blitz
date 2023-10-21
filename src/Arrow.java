@@ -17,58 +17,31 @@ public class Arrow extends Entity{
 
     @Override public void arrowInteraction(Arrow a)
     {
-        if(true)
-        {
-            return; //we are just gonna skip arrow to arrow interactions for now.
-        }
-        if(a == this)
-        {
-            return; //avoid self interactions.
-        }
-        //I think the best approach for this is to have arrows interact on other arrows than vice versa,
-        //where they just receive interactions from other arrows,
-        //How deep the entity can go into the terrain and still be repelled out of it
-        int buffer;
-        //buffer set here
-        buffer = 25;
-        //set variables for higher clarity
-        int terrainTopSide, terrainBotSide, terrainLeftSide, terrainRightSide;
-        int entityTopSide, entityBotSide, entityLeftSide, entityRightSide;
-        //Entities sides defined here:
-        entityTopSide = posY;
-        entityBotSide = posY + height;
-        entityLeftSide = posX;
-        entityRightSide = posX + width;
-        //whereas terrain is defined here because we go through all of it.
-        terrainTopSide = a.getYPos();
-        terrainBotSide = a.getYPos() + a.getHeight();
-        terrainLeftSide = a.getXPos();
-        terrainRightSide = a.getXPos() + a.getWidth();
-        //something about collisions causes massive lag, i assume it's due to both
-        //of them trying to interact with each other at the same time.
+        //you have to put it BEFORE terrain interaction, I guess that makes sense?
+        this.force((a.getVelX() + this.getVelX()) / 2, (a.getVelY() + this.getVelY()) / 2);
+        a.force((a.getVelX() + this.getVelX()) / 2, (a.getVelY() + this.getVelY()) / 2);
+        super.arrowInteraction(a);
+        /*methodology here is to have arrows interact like they're just terrain,
+        but since we are limiting arrows to impacting ones further down the line
+            (aka earlier spawned ones have precedence)
+        then in this scenario I believe we should apply interactions in reverse order
+        e.g. we should receive input from blocks that we are checking with.
+         */
+    }
 
-        //perhaps an "active" mode would fix that, but for now im gonna skip that.
-        //at best I will implement stacking them on top of each other.
-        if (entityBotSide >= terrainTopSide && entityBotSide <= terrainTopSide + buffer)
+    private boolean checkAllArrows()
+    {
+        int startHere = allArrows.indexOf(this) + 1;
+        for (int i = startHere; i < allArrows.size(); i++)
         {
-            onGround = true;
-            move(0, -1);
+            Arrow b = allArrows.get(i);
+            if (collidesWith(b))
+            {
+                arrowInteraction(b);
+                return true;
+            }
         }
-        if (entityTopSide <= terrainBotSide && entityTopSide >= terrainBotSide - buffer)
-        {
-            move(0, 1);
-            force(velX, 0);
-        }
-        if (entityRightSide >= terrainLeftSide && entityRightSide <= terrainLeftSide + buffer)
-        {
-            move(-1, 0);
-            a.push(velX, velY);
-        }
-        if (entityLeftSide <= terrainRightSide && entityLeftSide >= terrainRightSide - buffer)
-        {
-            move(1,0);
-            a.push(velX, velY);
-        }
+        return false;
     }
 
     @Override
